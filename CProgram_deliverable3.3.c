@@ -14,29 +14,30 @@ int main(int argc, char **argv)
 	// Connection to the MYSQL server
 	conn = mysql_init(NULL);
 	if (conn==NULL) {
-		printf("Error creating connection: %u %s\n",
+		printf("Error while trying to set connection: %u %s\n",
 			   mysql_errno(conn), mysql_error(conn));
 		exit (1);
 	}
 	// Initialize the connection
 	conn = mysql_real_connect (conn, "localhost","root", "mysql", "League",0, NULL, 0);
 	if (conn==NULL) {
-		printf("Error initializing connection: %u %s\n",
+		printf("Error while trying to initialize the connection: %u %s\n",
 			   mysql_errno(conn), mysql_error(conn));
 		exit (1);
 	}
 	
-	char Username[20];
+	char GameID[20];
 	// I ask the username of a player
-	printf("Give me the username of a player:");
-	scanf("%s", Username);
+	printf("Insert the Game ID to obtain the usernames of the players involved in the game:");
+	scanf("%s", GameID);
 	char query[256];
-	strcpy(query, "SELECT Game.Identifier_G FROM Player, Game, Game_Record WHERE Player.Username = '");
-	strcat(query, Username);
-	strcat(query, "' AND Player.Identifier_P = Game_Record.Player AND Game_Record.Game = Game.Identifier_G");
+	strcpy(query, "SELECT DISTINCT Player.Username FROM Player, Game, Game_Record WHERE Player.Identifier_P = Game_Record.Player AND Game_Record.Game = '");
+	strcat(query, GameID);
+	strcat(query, "'");
+	
 	err=mysql_query (conn, query);
 	if (err!=0) {
-		printf ("Error while querying data from database %u %s\n",
+		printf ("Error while processing the query request from database %u %s\n",
 				mysql_errno(conn), mysql_error(conn));
 		exit (1);
 	}
@@ -53,7 +54,7 @@ int main(int argc, char **argv)
 	// variable of type MYSQL_ROW
 	row = mysql_fetch_row(result);
 	if (row == NULL)
-		printf("No data was obtained in the query\n");
+		printf("An empty set of data was obtained while doing the query\n");
 	else
 		while (row !=NULL) {
 			// Column 0 contains the player's name
